@@ -1,6 +1,7 @@
 package dk.brams.android.criminalintent2;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,6 +33,29 @@ public class CrimeListFragment extends Fragment {
     private boolean mSubtitleVisible;
     private LinearLayout mLinearLayout;
     private Button mAddButton;
+    private Callback mCallback;
+
+
+    /*
+    Required interface for mCallback
+     */
+    public interface Callback {
+        void onCrimeSelected(Crime crime);
+    }
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallback = (Callback)activity;
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    }
 
 
     @Override
@@ -93,9 +117,9 @@ public class CrimeListFragment extends Fragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
 
-                startActivity(intent);
+                updateUI();
+                mCallback.onCrimeSelected(crime);
                 return true;
 
             case R.id.menu_item_show_subtitle:
@@ -141,7 +165,7 @@ public class CrimeListFragment extends Fragment {
     }
 
 
-    private void updateUI() {
+    public void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
@@ -191,10 +215,9 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
             mItemUpdatedPosition = getAdapterPosition();
-            // TODO need new implementation for the "touched" item based update
-            startActivity(intent);
+
+            mCallback.onCrimeSelected(mCrime);
         }
     }
 

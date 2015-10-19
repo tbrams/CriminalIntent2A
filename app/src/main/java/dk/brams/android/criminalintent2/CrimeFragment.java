@@ -59,6 +59,28 @@ public class CrimeFragment extends Fragment{
     private int suspectID;
     private ImageButton mPhotoButton;
     private ImageView mPhotoView;
+    private Callback mCallback;
+
+    /*
+    Mandatory interface for Callback
+     */
+
+    public interface Callback {
+        void onCrimeUpdated(Crime crime);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallback = (Callback) activity;
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    }
 
     public static CrimeFragment newInstance(UUID crimeId) {
         // create new Fragment with pre-bundled argument containing crimeId
@@ -112,6 +134,7 @@ public class CrimeFragment extends Fragment{
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setTitle(s.toString());
+                updateCrime();
             }
 
             @Override
@@ -150,6 +173,7 @@ public class CrimeFragment extends Fragment{
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                updateCrime();
             }
         });
 
@@ -278,10 +302,12 @@ public class CrimeFragment extends Fragment{
             case REQUEST_DATE:
                 Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
                 mCrime.setDate(date);
+                updateCrime();
                 updateDate();
                 break;
 
             case REQUEST_TIME:
+                updateCrime();
                 updateTime();
                 break;
 
@@ -305,6 +331,7 @@ public class CrimeFragment extends Fragment{
                         String suspect = c.getString(0);
                         suspectID = c.getInt(1);
                         mCrime.setSuspect(suspect);
+                        updateCrime();
 
                         // make dial button visible and put the name on the suspect button
                         mDialSuspectButton.setVisibility(View.VISIBLE);
@@ -345,6 +372,7 @@ public class CrimeFragment extends Fragment{
                 break;
 
             case REQUEST_PHOTO:
+                updateCrime();
                 updatePhotoView(mPhotoView);
                 break;
         }
@@ -364,6 +392,10 @@ public class CrimeFragment extends Fragment{
         return c;
     }
 
+    private void updateCrime() {
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+        mCallback.onCrimeUpdated(mCrime);
+    }
 
     private void updateDate() {
         mDateButton.setText(DateFormat.format("EEE d-LLL-yyyy", mCrime.getDate()));

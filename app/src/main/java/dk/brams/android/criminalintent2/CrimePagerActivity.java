@@ -12,7 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.List;
 import java.util.UUID;
 
-public class CrimePagerActivity extends AppCompatActivity {
+public class CrimePagerActivity extends AppCompatActivity
+                                implements CrimeFragment.Callback {
     private static final String EXTRA_CRIME_ID = "dk.brams.android.criminalintent.crime_id";
 
     private ViewPager mViewPager;
@@ -60,4 +61,8 @@ public class CrimePagerActivity extends AppCompatActivity {
         return intent;
     }
 
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+        // empty ... just need to be there
+    }
 }
